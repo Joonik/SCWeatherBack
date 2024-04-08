@@ -32,7 +32,7 @@ Route::get('/img', function (Request $request) {
 
         curl_setopt_array($curl, array(
             // CURLOPT_URL => "http://185.10.80.33:8082/record/current.jpg",
-            CURLOPT_URL => "http://98.97.102.60:$request->port/record/current.jpg",
+            CURLOPT_URL => "http://98.97.103.67:$request->port/record/current.jpg",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => array(
                 "Authorization: Basic " . base64_encode($username . ":" . $password)
