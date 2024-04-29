@@ -35,6 +35,7 @@ Route::get('/img', function (Request $request) {
         //get secret value
         $result = $client->getSecretValue([
             'SecretId' => 'weather-camera-credentials',
+            'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
         ]);
         //set response object
         $camera = (object) json_decode($result['SecretString'], true);
