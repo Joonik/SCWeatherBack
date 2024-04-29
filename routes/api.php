@@ -21,10 +21,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-
+//Main weather route to access camera ip pictures
+//Required params: api_key, new and port
 Route::get('/img', function (Request $request) {
     error_log(print_r($request->query('new', 0), true));
     error_log(print_r($request->query('new', 0), true));
+    //validate API key
+    if(env('API_KEY') !== $request->query('api_key')) return response('', 403);
+    //validate request params
     if ($request->query('new', 0) || !Storage::disk('local')->exists("cams/$request->port.jpg")) {
         //init curl
         $curl = curl_init();
@@ -63,11 +67,13 @@ Route::get('/img', function (Request $request) {
                 ]);
         }
     }
-
+    //get existing camera picture
     if (Storage::disk('local')->exists("cams/$request->port.jpg"))
         return response()->file(storage_path("app/cams/$request->port.jpg", [
             "cam-server-status" => "successful-response",
             "Access-Control-Expose-Headers"=>"cam-server-status" 
         ]));
-    else return response('', 404);
+    //no camera picture found
+    else 
+        return response('', 404);
 });

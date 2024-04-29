@@ -13,6 +13,7 @@
 - Add ip, username and password params
 - Create IAM policy for secrets, allow read access to specific secrets in AWS Secrets Manager
 - Set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_DEFAULT_REGION keys in .env file
+- Add API_KEY in .env file. This API key is needed to access api call
 
 ## About Laravel
 
