@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Aws\SecretsManager\SecretsManagerClient;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,24 +26,32 @@ Route::get('/img', function (Request $request) {
     error_log(print_r($request->query('new', 0), true));
     error_log(print_r($request->query('new', 0), true));
     if ($request->query('new', 0) || !Storage::disk('local')->exists("cams/$request->port.jpg")) {
+        //init curl
         $curl = curl_init();
-
-        $username = "Donaldedward1921";
-        $password = "Props&rotors@5755";
-
+        //get aws secret
+        $client = new SecretsManagerClient([
+            'version' => 'latest',
+        ]);
+        //get secret value
+        $result = $client->getSecretValue([
+            'SecretId' => 'weather-camera-credentials',
+        ]);
+        //set response object
+        $camera = (object) json_decode($result['SecretString'], true);
+        //curl settings
         curl_setopt_array($curl, array(
             // CURLOPT_URL => "http://185.10.80.33:8082/record/current.jpg",
-            CURLOPT_URL => "http://98.97.103.67:$request->port/record/current.jpg",
+            CURLOPT_URL => "http://$camera->ip:$request->port/record/current.jpg",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => array(
-                "Authorization: Basic " . base64_encode($username . ":" . $password)
+                "Authorization: Basic " . base64_encode($camera->username . ":" . $camera->password)
             ),
             CURLOPT_TIMEOUT_MS => 10000
         ));
-
+        //execute and close curl request
         $response = curl_exec($curl);
         curl_close($curl);
-
+        //store camera picture
         if ($response) {
             Storage::disk('local')->put("cams/$request->port.jpg", $response);
         } else {
@@ -59,5 +68,5 @@ Route::get('/img', function (Request $request) {
             "cam-server-status" => "successful-response",
             "Access-Control-Expose-Headers"=>"cam-server-status" 
         ]));
-    else return response()->status(404);
+    else return response('', 404);
 });
